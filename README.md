@@ -6,6 +6,10 @@ This is a brief tutorial was very inspired by [the illustrated guide to Linux ne
 
 > #### Feel free to send corrections and suggestions! :)
 
+# Linux network queues overview
+
+![linux network queues](/img/linux_network_flow.png "A graphic representation of linux/kernel network main buffer / queues")
+
 # Fitting the sysctl variables into the Linux network flow
 
 ## Ingress - they're coming
@@ -21,6 +25,8 @@ This is a brief tutorial was very inspired by [the illustrated guide to Linux ne
 1. Delivered to the receive buffer and sized as `tcp_rmem`
     1. If `tcp_moderate_rcvbuf` is enabled kernel will auto tune the receive buffer
 1. Application reads data
+
+![tcp ingress flow](/img/tcp_ingress_flow.png "A graphic representation of tcp ingress flow")
 
 ## Egress - they're leaving
 1. Application writes data at send buffer of `tcp_wmem` size
