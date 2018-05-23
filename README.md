@@ -90,16 +90,20 @@ This brief tutorial was inspired by [the illustrated guide to Linux networking s
 
 * https://www.kernel.org/doc/Documentation/sysctl/net.txt
 * https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt
-* https://wiki.mikejung.biz/OS_Tuning
-* https://www.coverfire.com/articles/queueing-in-the-linux-network-stack/
+* https://www.kernel.org/doc/Documentation/networking/scaling.txt
+* http://man7.org/linux/man-pages/man7/tcp.7.html
+* http://man7.org/linux/man-pages/man8/tc.8.html
+* http://www.ece.virginia.edu/cheetah/documents/papers/TCPlinux.pdf
+* https://netdevconf.org/1.2/papers/bbr-netdev-1.2.new.new.pdf
+* https://blog.cloudflare.com/how-to-receive-a-million-packets/
+* https://blog.cloudflare.com/how-to-achieve-low-latency/
 * https://blog.packagecloud.io/eng/2016/06/22/monitoring-tuning-linux-networking-stack-receiving-data/
+* https://www.coverfire.com/articles/queueing-in-the-linux-network-stack/
 * http://vger.kernel.org/~davem/skb.html
 * https://www.missoulapubliclibrary.org/ftp/LinuxJournal/LJ13-07.pdf
 * https://opensourceforu.com/2016/10/network-performance-monitoring/
-* http://man7.org/linux/man-pages/man7/tcp.7.html
 * https://www.yumpu.com/en/document/view/55400902/an-adventure-of-analysis-and-optimisation-of-the-linux-networking-stack
 * https://lwn.net/Articles/616241/
-* http://man7.org/linux/man-pages/man8/tc.8.html
 * https://medium.com/@duhroach/tools-to-profile-networking-performance-3141870d5233
 * https://www.lmax.com/blog/staff-blogs/2016/05/06/navigating-linux-kernel-network-stack-receive-path/
 * https://es.net/host-tuning/100g-tuning/
@@ -108,9 +112,6 @@ This brief tutorial was inspired by [the illustrated guide to Linux networking s
 * https://people.cs.clemson.edu/~westall/853/tcpperf.pdf
 * http://tldp.org/HOWTO/Traffic-Control-HOWTO/classless-qdiscs.html
 * https://es.net/assets/Papers-and-Publications/100G-Tuning-TechEx2016.tierney.pdf
-* https://www.kernel.org/doc/Documentation/networking/scaling.txt
-* https://netdevconf.org/1.2/papers/bbr-netdev-1.2.new.new.pdf
-* http://www.ece.virginia.edu/cheetah/documents/papers/TCPlinux.pdf
 * https://www.kernel.org/doc/ols/2009/ols2009-pages-169-184.pdf
 * https://devcentral.f5.com/articles/the-send-buffer-in-depth-21845
 * http://packetbomb.com/understanding-throughput-and-tcp-windows/
