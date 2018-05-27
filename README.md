@@ -98,6 +98,12 @@ This brief tutorial was inspired by [the illustrated guide to Linux networking s
 * https://blog.cloudflare.com/how-to-receive-a-million-packets/
 * https://blog.cloudflare.com/how-to-achieve-low-latency/
 * https://blog.packagecloud.io/eng/2016/06/22/monitoring-tuning-linux-networking-stack-receiving-data/
+* https://www.youtube.com/watch?v=6Fl1rsxk4JQ
+* https://www.intel.com/content/dam/www/public/us/en/documents/reference-guides/xl710-x710-performance-tuning-linux-guide.pdf
+* https://access.redhat.com/sites/default/files/attachments/20150325_network_performance_tuning.pdf
+* https://www.intel.com/content/dam/www/public/us/en/documents/white-papers/multi-core-processor-based-linux-paper.pdf
+* http://syuu.dokukino.com/2013/05/linux-kernel-features-for-high-speed.html
+* https://software.intel.com/en-us/articles/setting-up-intel-ethernet-flow-director
 * https://www.coverfire.com/articles/queueing-in-the-linux-network-stack/
 * http://vger.kernel.org/~davem/skb.html
 * https://www.missoulapubliclibrary.org/ftp/LinuxJournal/LJ13-07.pdf
