@@ -91,6 +91,7 @@ This brief tutorial was inspired by [the illustrated guide to Linux networking s
 * https://www.kernel.org/doc/Documentation/sysctl/net.txt
 * https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt
 * https://www.kernel.org/doc/Documentation/networking/scaling.txt
+* https://www.kernel.org/doc/Documentation/networking/proc_net_tcp.txt
 * http://man7.org/linux/man-pages/man7/tcp.7.html
 * http://man7.org/linux/man-pages/man8/tc.8.html
 * http://www.ece.virginia.edu/cheetah/documents/papers/TCPlinux.pdf
@@ -124,3 +125,7 @@ This brief tutorial was inspired by [the illustrated guide to Linux networking s
 * https://www.speedguide.net/bdp.php
 * https://www.switch.ch/network/tools/tcp_throughput/
 * https://www.ibm.com/support/knowledgecenter/en/SSQPD3_2.6.0/com.ibm.wllm.doc/usingethtoolrates.html
+* https://blog.tsunanet.net/2011/03/out-of-socket-memory.html
+* https://unix.stackexchange.com/questions/12985/how-to-check-rx-ring-max-backlog-and-max-syn-backlog-size
+* https://serverfault.com/questions/498245/how-to-reduce-number-of-time-wait-processes
+* https://unix.stackexchange.com/questions/419518/how-to-tell-how-much-memory-tcp-buffers-are-actually-using
