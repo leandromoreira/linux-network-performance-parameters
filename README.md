@@ -99,6 +99,9 @@ This brief tutorial was inspired by [the illustrated guide to Linux networking s
 
 **How to monitor:** `netstat -atn | awk '/tcp/ {print $6}' | sort | uniq -c`
 
+![tcp finite state machine](https://upload.wikimedia.org/wikipedia/commons/a/a2/Tcp_state_diagram_fixed.svg "A graphic representation of tcp tcp finite state machine")
+Source: https://commons.wikimedia.org/wiki/File:Tcp_state_diagram_fixed_new.svg
+
 # References
 
 * https://www.kernel.org/doc/Documentation/sysctl/net.txt
