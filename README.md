@@ -90,14 +90,23 @@ This brief tutorial was inspired by [the illustrated guide to Linux networking s
   * **How to monitor:** `cat /proc/net/sockstat`
 
 ## Honorable mentions: (more related to TCP FSM queues and algorithms)
-* `somaxconn` - Limit of socket listen() backlog, known in userspace as SOMAXCONN.
+* `somaxconn` - Limit of socket [listen() backlog](https://eklitzke.org/how-tcp-sockets-work), known in userspace as SOMAXCONN.
 * `tcp_fin_timeout` - this specifies how many seconds to wait for a final FIN packet before the socket is forcibly closed.  This is strictly a violation of the TCP specification, but required to prevent denial-of-service attacks.
 * `tcp_available_congestion_control` - shows the available congestion control choices that are registered.
 * `tcp_congestion_control` - set the congestion control algorithm to be used for new connections.
 * `tcp_max_syn_backlog` - the maximum number of queued connection requests which have still not received an acknowledgement from the connecting client.  If this number is exceeded, the kernel will begin dropping requests.
 * `tcp_slow_start_after_idle` - enable/disable tcp slow start
 
-**How to monitor:** `netstat -atn | awk '/tcp/ {print $6}' | sort | uniq -c`
+**How to monitor:** 
+* `netstat -atn | awk '/tcp/ {print $6}' | sort | uniq -c ; summary by state`
+* `ss -neopt state time-wait | wc -l; count for a specific state: established, syn-sent, syn-recv, fin-wait-1, fin-wait-2, time-wait, closed, close-wait, last-ack, listening, closing`
+* `netstat -st; tcp stats summary`
+* `nstat -a; human friendly tcp stats summary`
+* `cat /proc/net/sockstat; summary`
+* `cat /proc/net/tcp; detailed, see each field meaning at https://www.kernel.org/doc/Documentation/networking/proc_net_tcp.txt`
+* `cat /proc/net/netstat; ListenOverflows and ListenDrops are fields to closely monitor;`
+  * `cat /proc/net/netstat | awk '(f==0) { i=1; while ( i<=NF) {n[i] = $i; i++ }; f=1; next} \
+(f==1){ i=2; while ( i<=NF){ printf "%s = %d\n", n[i], $i; i++}; f=0} ' | grep -v "= 0"; from https://sa-chernomor.livejournal.com/9858.html`
 
 ![tcp finite state machine](https://upload.wikimedia.org/wikipedia/commons/a/a2/Tcp_state_diagram_fixed.svg "A graphic representation of tcp tcp finite state machine")
 Source: https://commons.wikimedia.org/wiki/File:Tcp_state_diagram_fixed_new.svg
@@ -145,3 +154,7 @@ Source: https://commons.wikimedia.org/wiki/File:Tcp_state_diagram_fixed_new.svg
 * https://unix.stackexchange.com/questions/12985/how-to-check-rx-ring-max-backlog-and-max-syn-backlog-size
 * https://serverfault.com/questions/498245/how-to-reduce-number-of-time-wait-processes
 * https://unix.stackexchange.com/questions/419518/how-to-tell-how-much-memory-tcp-buffers-are-actually-using
+* https://eklitzke.org/how-tcp-sockets-work
+* https://www.linux.com/learn/intro-to-linux/2017/7/introduction-ss-command
+* https://staaldraad.github.io/2017/12/20/netstat-without-netstat/
+* https://loicpefferkorn.net/2016/03/linux-network-metrics-why-you-should-use-nstat-instead-of-netstat/
