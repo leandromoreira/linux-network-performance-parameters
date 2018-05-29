@@ -78,11 +78,11 @@ This brief tutorial was inspired by [the illustrated guide to Linux networking s
   * **How to monitor:**   `tc -s qdisc ls dev ethX`
 * `tcp_rmem` - min (size used under memory pressure), default (initial size), max (maximum size) - size of receive buffer used by TCP sockets.
   * **Check command:** `sysctl net.ipv4.tcp_rmem`
-  * **Change command:** `sysctl -w net.ipv4.tcp_rmem="min default max"`
+  * **Change command:** `sysctl -w net.ipv4.tcp_rmem="min default max"; when changing default value remember to restart your user space app (ie: your web server, nginx and etc)`
   * **How to monitor:** `cat /proc/net/sockstat`
 * `tcp_wmem` - min (size used under memory pressure), default (initial size), max (maximum size) - size of send buffer used by TCP sockets.
   * **Check command:** `sysctl net.ipv4.tcp_wmem`
-  * **Change command:** `sysctl -w net.ipv4.tcp_wmem="min default max"`
+  * **Change command:** `sysctl -w net.ipv4.tcp_wmem="min default max"; when changing default value remember to restart your user space app (ie: your web server, nginx and etc)`
   * **How to monitor:** `cat /proc/net/sockstat`
 * `tcp_moderate_rcvbuf` - If set, TCP performs receive buffer auto-tuning, attempting to automatically size the buffer.
   * **Check command:** `sysctl net.ipv4.tcp_moderate_rcvbuf`
