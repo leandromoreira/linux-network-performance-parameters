@@ -45,38 +45,46 @@ This brief tutorial was inspired by [the illustrated guide to Linux networking s
 # sysctl parameters - a short description
 
 * receive/send `ring buffer rx,tx` - the driver receive/send queue a single or multiple queues with fixed size, usually implemented as FIFO, it is located at RAM and it only links to the real packets (skb_buff)
-  * Check command: `ethtool -g interface`
-  * Change command: `ethtool -G interface rx value tx value`
+  * **Check command:** `ethtool -g interface`
+  * **Change command:** `ethtool -G interface rx value tx value`
+  * **How to monitor:** `ethtool -S ethX | grep -e "err" -e "drop" -e "over" -e "miss" -e "timeout" -e "reset" -e "restar" -e "collis" | grep -v "\: 0"`
 * `rx-usecs,tx-usecs` - number of microseconds to wait before raising a hardIRQ, from NIC perspective it'll DMA data packets until this timeout
-  * Check command: `ethtool -c interface`
-  * Change command: `ethtool -C interface rx-usecs value tx-usecs value`
+  * **Check command:** `ethtool -c interface`
+  * **Change command:** `ethtool -C interface rx-usecs value tx-usecs value`
+  * **How to monitor:** `cat /proc/interrupts` 
 * `netdev_budget_usecs` - Maximum number of microseconds in one NAPI polling cycle. Polling will exit when either netdev_budget_usecs have elapsed during the poll cycle or the number of packets processed reaches netdev_budget.
-  * Check command: `sysctl net.core.netdev_budget_usecs`
-  * Change command: `sysctl -w net.core.netdev_budget_usecs value`
+  * **Check command:** `sysctl net.core.netdev_budget_usecs`
+  * **Change command:** `sysctl -w net.core.netdev_budget_usecs value`
+  * **How to monitor:** `cat /proc/net/softnet_stat; https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh`
 * `netdev_budget` - Maximum number of packets taken from all interfaces in one polling cycle (NAPI poll). In one polling cycle interfaces which are registered to polling areprobed in a round-robin manner. Also, a polling cycle may not exceed netdev_budget_usecs microseconds, even if netdev_budget has not been exhausted.
-  * Check command: `sysctl net.core.netdev_budget`
-  * Change command: `sysctl -w net.core.netdev_budget value`
+  * **Check command:** `sysctl net.core.netdev_budget`
+  * **Change command:** `sysctl -w net.core.netdev_budget value`
+  * **How to monitor:** `cat /proc/net/softnet_stat; https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh`
 * `dev_weight` - The maximum number of packets that kernel can handle on a NAPI interrupt, it's a Per-CPU variable. For drivers that support LRO or GRO_HW, a hardware aggregated packet is counted as one packet in this
-  * Check command: `sysctl net.core.dev_weight`
-  * Change command: `sysctl -w net.core.dev_weight value`
+  * **Check command:** `sysctl net.core.dev_weight`
+  * **Change command:** `sysctl -w net.core.dev_weight value`
+  * **How to monitor:** `cat /proc/net/softnet_stat; https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh`
 * `netdev_max_backlog` - Maximum number  of  packets,  queued  on  the  INPUT  side, when the interface receives packets faster than kernel can process them.
-  * Check command: `sysctl net.core.netdev_max_backlog`
-  * Change command: `sysctl -w net.core.netdev_max_backlog value`
+  * **Check command:** `sysctl net.core.netdev_max_backlog`
+  * **Change command:** `sysctl -w net.core.netdev_max_backlog value`
+  * **How to monitor:** `cat /proc/net/softnet_stat; https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh`
 * `txqueuelen` - Maximum number of packets, queued on the OUTPUT side.
-  * Check command: `ifconfig interface`
-  * Change command: `ifconfig interface txqueuelen value`
+  * **Check command:** `ifconfig interface`
+  * **Change command:** `ifconfig interface txqueuelen value`
+  * **How to monitor:** `ip -s link` 
 * `default_qdisc` - The default queuing discipline to use for network devices.
-  * Check command: `sysctl net.core.default_qdisc`
-  * Change command: `sysctl -w net.core.default_qdisc value`
+  * **Check command:** `sysctl net.core.default_qdisc`
+  * **Change command:** `sysctl -w net.core.default_qdisc value`
+  * **How to monitor:**   `tc -s qdisc ls dev ethX`
 * `tcp_rmem` - min (size used under memory pressure), default (initial size), max (maximum size) - size of receive buffer used by TCP sockets.
-  * Check command: `sysctl net.ipv4.tcp_rmem`
-  * Change command: `sysctl -w net.ipv4.tcp_rmem="min default max"`
+  * **Check command:** `sysctl net.ipv4.tcp_rmem`
+  * **Change command:** `sysctl -w net.ipv4.tcp_rmem="min default max"`
 * `tcp_wmem` - min (size used under memory pressure), default (initial size), max (maximum size) - size of send buffer used by TCP sockets.
-  * Check command: `sysctl net.ipv4.tcp_wmem`
-  * Change command: `sysctl -w net.ipv4.tcp_wmem="min default max"`
+  * **Check command:** `sysctl net.ipv4.tcp_wmem`
+  * **Change command:** `sysctl -w net.ipv4.tcp_wmem="min default max"`
 * `tcp_moderate_rcvbuf` - If set, TCP performs receive buffer auto-tuning, attempting to automatically size the buffer.
-  * Check command: `sysctl net.ipv4.tcp_moderate_rcvbuf`
-  * Change command: `sysctl -w net.ipv4.tcp_moderate_rcvbuf value`
+  * **Check command:** `sysctl net.ipv4.tcp_moderate_rcvbuf`
+  * **Change command:** `sysctl -w net.ipv4.tcp_moderate_rcvbuf value`
 
 ## Honorable mentions: (more related to TCP FSM queues and algorithms)
 * `somaxconn` - Limit of socket listen() backlog, known in userspace as SOMAXCONN.
@@ -85,6 +93,8 @@ This brief tutorial was inspired by [the illustrated guide to Linux networking s
 * `tcp_congestion_control` - set the congestion control algorithm to be used for new connections.
 * `tcp_max_syn_backlog` - the maximum number of queued connection requests which have still not received an acknowledgement from the connecting client.  If this number is exceeded, the kernel will begin dropping requests.
 * `tcp_slow_start_after_idle` - enable/disable tcp slow start
+
+**How to monitor:** `netstat -atn | awk '/tcp/ {print $6}' | sort | uniq -c`
 
 # References
 
