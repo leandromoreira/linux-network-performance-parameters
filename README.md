@@ -79,12 +79,15 @@ This brief tutorial was inspired by [the illustrated guide to Linux networking s
 * `tcp_rmem` - min (size used under memory pressure), default (initial size), max (maximum size) - size of receive buffer used by TCP sockets.
   * **Check command:** `sysctl net.ipv4.tcp_rmem`
   * **Change command:** `sysctl -w net.ipv4.tcp_rmem="min default max"`
+  * **How to monitor:** `cat /proc/net/sockstat`
 * `tcp_wmem` - min (size used under memory pressure), default (initial size), max (maximum size) - size of send buffer used by TCP sockets.
   * **Check command:** `sysctl net.ipv4.tcp_wmem`
   * **Change command:** `sysctl -w net.ipv4.tcp_wmem="min default max"`
+  * **How to monitor:** `cat /proc/net/sockstat`
 * `tcp_moderate_rcvbuf` - If set, TCP performs receive buffer auto-tuning, attempting to automatically size the buffer.
   * **Check command:** `sysctl net.ipv4.tcp_moderate_rcvbuf`
   * **Change command:** `sysctl -w net.ipv4.tcp_moderate_rcvbuf value`
+  * **How to monitor:** `cat /proc/net/sockstat`
 
 ## Honorable mentions: (more related to TCP FSM queues and algorithms)
 * `somaxconn` - Limit of socket listen() backlog, known in userspace as SOMAXCONN.
