@@ -83,7 +83,7 @@ This brief tutorial was inspired by [the illustrated guide to Linux networking s
   * **Change command:** `sysctl -w net.core.netdev_max_backlog value`
   * **How to monitor:** `cat /proc/net/softnet_stat;or a better tool  https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh`
   
-## Egress qdisc - txqueuelen and default_qdisc
+## Egress QDisc - txqueuelen and default_qdisc
 * **What** - `txqueuelen` is the maximum number of packets, queued on the OUTPUT side.
 * **Why** - a buffer/queue to face connection burst and also to apply [tc (traffic control).](http://tldp.org/HOWTO/Traffic-Control-HOWTO/intro.html)
 * **How:**
