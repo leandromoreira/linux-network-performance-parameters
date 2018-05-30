@@ -143,6 +143,7 @@ Source: https://commons.wikimedia.org/wiki/File:Tcp_state_diagram_fixed_new.svg
 * https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt
 * https://www.kernel.org/doc/Documentation/networking/scaling.txt
 * https://www.kernel.org/doc/Documentation/networking/proc_net_tcp.txt
+* https://www.kernel.org/doc/Documentation/networking/multiqueue.txt
 * http://man7.org/linux/man-pages/man7/tcp.7.html
 * http://man7.org/linux/man-pages/man8/tc.8.html
 * http://www.ece.virginia.edu/cheetah/documents/papers/TCPlinux.pdf
@@ -155,6 +156,7 @@ Source: https://commons.wikimedia.org/wiki/File:Tcp_state_diagram_fixed_new.svg
 * https://access.redhat.com/sites/default/files/attachments/20150325_network_performance_tuning.pdf
 * https://www.intel.com/content/dam/www/public/us/en/documents/white-papers/multi-core-processor-based-linux-paper.pdf
 * http://syuu.dokukino.com/2013/05/linux-kernel-features-for-high-speed.html
+* https://www.bufferbloat.net/projects/codel/wiki/Best_practices_for_benchmarking_Codel_and_FQ_Codel/
 * https://software.intel.com/en-us/articles/setting-up-intel-ethernet-flow-director
 * https://www.coverfire.com/articles/queueing-in-the-linux-network-stack/
 * http://vger.kernel.org/~davem/skb.html
