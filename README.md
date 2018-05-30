@@ -42,55 +42,81 @@ This brief tutorial was inspired by [the illustrated guide to Linux networking s
 1. And schedule (`softIRQ`) the NAPI poll system 
 1. NAPI will handle the receive packets signaling and free the RAM
 
-# sysctl parameters - a short description
+# What, Why and How - network and sysctl parameters
 
-* receive/send `ring buffer rx,tx` - the driver receive/send queue a single or multiple queues with fixed size, usually implemented as FIFO, it is located at RAM and it only links to the real packets (skb_buff)
-  * **Check command:** `ethtool -g interface`
-  * **Change command:** `ethtool -G interface rx value tx value`
-  * **How to monitor:** `ethtool -S ethX | grep -e "err" -e "drop" -e "over" -e "miss" -e "timeout" -e "reset" -e "restar" -e "collis" | grep -v "\: 0"`
-* `rx-usecs,tx-usecs` - number of microseconds to wait before raising a hardIRQ, from NIC perspective it'll DMA data packets until this timeout
-  * **Check command:** `ethtool -c interface`
-  * **Change command:** `ethtool -C interface rx-usecs value tx-usecs value`
+## Ring Buffer - rx,tx
+* **What** - the driver receive/send queue a single or multiple queues with fixed size, usually implemented as FIFO, it is located at RAM
+* **Why** - a buffer to smoothly accept bursts of connections without droping them, you might need to increase these queues when you see drops or overrun, aka there are more packets comming than the kernel is able to consume them, the side effect might be increased latency.
+* **How:**
+  * **Check command:** `ethtool -g ethX`
+  * **Change command:** `ethtool -G ethX rx value tx value`
+  * **How to monitor:** `ethtool -S ethX | grep -e "err" -e "drop" -e "over" -e "miss" -e "timeout" -e "reset" -e "restar" -e "collis" -e "over" | grep -v "\: 0"`
+ 
+## Interrupt Coalescence (IC) - rx-usecs, tx-usecs, rx-frames, tx-frames (hardware IRQ)
+* **What** - number of microseconds/frames to wait before raising a hardIRQ, from the NIC perspective it'll DMA data packets until this timeout/number of frames
+* **Why** - Reduce CPUs usage, hard IRQ, might increase throughput at cost of latency.
+* **How:**
+  * **Check command:** `ethtool -c ethX`
+  * **Change command:** `ethtool -C ethX rx-usecs value tx-usecs value`
   * **How to monitor:** `cat /proc/interrupts` 
-* `netdev_budget_usecs` - Maximum number of microseconds in one NAPI polling cycle. Polling will exit when either netdev_budget_usecs have elapsed during the poll cycle or the number of packets processed reaches netdev_budget.
+  
+## Interrupt Coalescing (soft IRQ) and Ingress QDisc
+* **What** - maximum number of microseconds in one [NAPI](https://en.wikipedia.org/wiki/New_API) polling cycle. Polling will exit when either `netdev_budget_usecs` have elapsed during the poll cycle or the number of packets processed reaches  `netdev_budget`.
+* **Why** - instead of reacting to tons of softIRQ, the driver keeps polling data, keep an eye on `dropped` and `squeezed`, dropped  # of packets that were dropped because `netdev_max_backlog` was exceeded and squeezed  # of times ksoftirq ran out of `netdev_budget` or time slice with work remaining.
+* **How:**
   * **Check command:** `sysctl net.core.netdev_budget_usecs`
   * **Change command:** `sysctl -w net.core.netdev_budget_usecs value`
-  * **How to monitor:** `cat /proc/net/softnet_stat; https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh`
-* `netdev_budget` - Maximum number of packets taken from all interfaces in one polling cycle (NAPI poll). In one polling cycle interfaces which are registered to polling areprobed in a round-robin manner. Also, a polling cycle may not exceed netdev_budget_usecs microseconds, even if netdev_budget has not been exhausted.
+  * **How to monitor:** `cat /proc/net/softnet_stat; or a better tool https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh`  
+* **What** - `netdev_budget` is the maximum number of packets taken from all interfaces in one polling cycle (NAPI poll). In one polling cycle interfaces which are registered to polling areprobed in a round-robin manner. Also, a polling cycle may not exceed `netdev_budget_usecs` microseconds, even if `netdev_budget` has not been exhausted.
+* **How:**
   * **Check command:** `sysctl net.core.netdev_budget`
   * **Change command:** `sysctl -w net.core.netdev_budget value`
-  * **How to monitor:** `cat /proc/net/softnet_stat; https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh`
-* `dev_weight` - The maximum number of packets that kernel can handle on a NAPI interrupt, it's a Per-CPU variable. For drivers that support LRO or GRO_HW, a hardware aggregated packet is counted as one packet in this
+  * **How to monitor:** `cat /proc/net/softnet_stat; or a better tool https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh`
+* **What** - `dev_weight` is the maximum number of packets that kernel can handle on a NAPI interrupt, it's a Per-CPU variable. For drivers that support LRO or GRO_HW, a hardware aggregated packet is counted as one packet in this.
+* **How:**
   * **Check command:** `sysctl net.core.dev_weight`
   * **Change command:** `sysctl -w net.core.dev_weight value`
-  * **How to monitor:** `cat /proc/net/softnet_stat; https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh`
-* `netdev_max_backlog` - Maximum number  of  packets,  queued  on  the  INPUT  side, when the interface receives packets faster than kernel can process them.
+  * **How to monitor:** `cat /proc/net/softnet_stat;o r a better tool  https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh`
+* **What** - `netdev_max_backlog` is the maximum number  of  packets,  queued  on  the  INPUT side (_the ingress qdisc_), when the interface receives packets faster than kernel can process them.
+* **How:**
   * **Check command:** `sysctl net.core.netdev_max_backlog`
   * **Change command:** `sysctl -w net.core.netdev_max_backlog value`
-  * **How to monitor:** `cat /proc/net/softnet_stat; https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh`
-* `txqueuelen` - Maximum number of packets, queued on the OUTPUT side.
-  * **Check command:** `ifconfig interface`
-  * **Change command:** `ifconfig interface txqueuelen value`
+  * **How to monitor:** `cat /proc/net/softnet_stat;or a better tool  https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh`
+  
+## Egress qdisc - txqueuelen and default_qdisc
+* **What** - `txqueuelen` is the maximum number of packets, queued on the OUTPUT side.
+* **Why** - a buffer/queue to face connection burst and also to apply [tc (traffic control).](http://tldp.org/HOWTO/Traffic-Control-HOWTO/intro.html)
+* **How:**
+  * **Check command:** `ifconfig ethX`
+  * **Change command:** `ifconfig ethX txqueuelen value`
   * **How to monitor:** `ip -s link` 
-* `default_qdisc` - The default queuing discipline to use for network devices.
+* **What** - `default_qdisc` is the default queuing discipline to use for network devices.
+* **Why** - each application has different load and need to traffic control and it is used also to fight against [bufferfloat](https://www.bufferbloat.net/projects/codel/wiki/)
+* **How:**
   * **Check command:** `sysctl net.core.default_qdisc`
   * **Change command:** `sysctl -w net.core.default_qdisc value`
   * **How to monitor:**   `tc -s qdisc ls dev ethX`
-* `tcp_rmem` - min (size used under memory pressure), default (initial size), max (maximum size) - size of receive buffer used by TCP sockets.
+
+## TCP Read and Write Buffers/Queues
+* **What** - `tcp_rmem` - min (size used under memory pressure), default (initial size), max (maximum size) - size of receive buffer used by TCP sockets.
+* **Why** - the application buffer/queue to the write/send data, it's provided to the userspace from the skb_buff.
+* **How:**
   * **Check command:** `sysctl net.ipv4.tcp_rmem`
   * **Change command:** `sysctl -w net.ipv4.tcp_rmem="min default max"; when changing default value remember to restart your user space app (ie: your web server, nginx and etc)`
   * **How to monitor:** `cat /proc/net/sockstat`
-* `tcp_wmem` - min (size used under memory pressure), default (initial size), max (maximum size) - size of send buffer used by TCP sockets.
+* **What** - `tcp_wmem` - min (size used under memory pressure), default (initial size), max (maximum size) - size of send buffer used by TCP sockets.
+* **How:**
   * **Check command:** `sysctl net.ipv4.tcp_wmem`
   * **Change command:** `sysctl -w net.ipv4.tcp_wmem="min default max"; when changing default value remember to restart your user space app (ie: your web server, nginx and etc)`
   * **How to monitor:** `cat /proc/net/sockstat`
-* `tcp_moderate_rcvbuf` - If set, TCP performs receive buffer auto-tuning, attempting to automatically size the buffer.
+* **What** `tcp_moderate_rcvbuf` - If set, TCP performs receive buffer auto-tuning, attempting to automatically size the buffer.
+* **How:**
   * **Check command:** `sysctl net.ipv4.tcp_moderate_rcvbuf`
   * **Change command:** `sysctl -w net.ipv4.tcp_moderate_rcvbuf value`
   * **How to monitor:** `cat /proc/net/sockstat`
 
-## Honorable mentions: (more related to TCP FSM queues and algorithms)
-* `somaxconn` - Limit of socket [listen() backlog](https://eklitzke.org/how-tcp-sockets-work), known in userspace as SOMAXCONN.
+## Honorable mentions - TCP FSM and congestion algorithm
+* `somaxconn` - Limit of socket [listen() backlog](https://eklitzke.org/how-tcp-sockets-work), known in userspace as SOMAXCONN. When you change this value you should change your application to the same value, for example [nginx backlog](http://nginx.org/en/docs/http/ngx_http_core_module.html#listen) should be changed.
 * `tcp_fin_timeout` - this specifies how many seconds to wait for a final FIN packet before the socket is forcibly closed.  This is strictly a violation of the TCP specification, but required to prevent denial-of-service attacks.
 * `tcp_available_congestion_control` - shows the available congestion control choices that are registered.
 * `tcp_congestion_control` - set the congestion control algorithm to be used for new connections.
