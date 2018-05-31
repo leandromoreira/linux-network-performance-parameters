@@ -1,3 +1,19 @@
+# TOC
+
+* [Introduction](#introduction)
+* [Linux network queues overview](#linux-network-queues-overview)
+* [Fitting the sysctl variables into the Linux network flow](#fitting-the-sysctl-variables-into-the-linux-network-flow)
+  * Ingress - they're coming
+  * Egress - they're leaving
+* [What, Why and How - network and sysctl parameters](#what-why-and-how---network-and-sysctl-parameters)
+  * Ring Buffer - rx,tx
+  * Interrupt Coalescence (IC) - rx-usecs, tx-usecs, rx-frames, tx-frames (hardware IRQ)
+  * Interrupt Coalescing (soft IRQ) and Ingress QDisc
+  * Egress QDisc - txqueuelen and default_qdisc
+  * TCP Read and Write Buffers/Queues
+  * Honorable mentions - TCP FSM and congestion algorithm
+* [References](#references)
+
 # Introduction
 
 Sometimes people are looking for [sysctl](https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt) cargo-culting values that bring high throughput and low latency with no trade-off and that works on every ocasion. That's not realistic, although we can say that the **newer kernel versions are very well tuned by default**. In fact you might [hurt performance if you mess with the defaults](https://medium.com/@duhroach/the-bandwidth-delay-problem-c6a2a578b211).
