@@ -42,17 +42,25 @@ This one though, we aim to show **where some of the most used and quoted sysctl/
 1. Application wakes up and reads the data
 
 ## Egress - they're leaving
-1. Application writes data at send buffer of `tcp_wmem` size
-1. Packets are handled by socket subsystem (TCP, IP)
-1. The socket subsystem feeds the output queue of `txqueuelen` length with its algorithm `default_qdisc`
+1. Application sends message (`sendmsg` or other)
+1. TCP send message allocates skb_buff
+1. It enqueues skb to the socket write buffer of `tcp_wmem` size
+1. Builds the TCP header (src and dst port, check sum)
+1. Calls L3 handler (in this case `ipv4` on `tcp_write_xmit` and `tcp_transmit_skb`)
+1. L3 (`ip_queue_xmit`) does its work: build ip header and call netfilter (`LOCAL_OUT`)
+1. Calls output route action
+1. Calls netfilter (`POST_ROUTING`)
+1. Fragment the packet (`ip_output`)
+1. Calls L2 send function (`dev_queue_xmit`)
+1. Feeds the output (QDisc) queue of `txqueuelen` length with its algorithm `default_qdisc`
 1. The driver code enqueue the packets at the `ring buffer tx`
-1. The driver will do a `softIRQ (NET_TX_SOFTIRQ)` after `tx-usecs` timeout
-1. Re-enable hardIRQ to NIC
+1. The driver will do a `soft IRQ (NET_TX_SOFTIRQ)` after `tx-usecs` timeout or `tx-frames`
+1. Re-enable hard IRQ to NIC
 1. Driver will map all the packets (to be sent) to some DMA'ed region
 1. NIC fetches the packets (via DMA) from RAM to transmit
-1. After the transmission NIC will raise a `hardIRQ` to signal its completion
+1. After the transmission NIC will raise a `hard IRQ` to signal its completion
 1. The driver will handle this IRQ (turn it off)
-1. And schedule (`softIRQ`) the NAPI poll system 
+1. And schedule (`soft IRQ`) the NAPI poll system 
 1. NAPI will handle the receive packets signaling and free the RAM
 
 # What, Why and How - network and sysctl parameters
