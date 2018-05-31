@@ -16,19 +16,30 @@ This one though, we aim to show **where some of the most used and quoted sysctl/
 
 ## Ingress - they're coming
 1. Packets arrive at the NIC
-1. NIC will DMA packets at RAM and references to them at receive ring buffer queue `rx` until `rx-usecs` timeout
-1. NIC will raise a `hardIRQ`
+1. NIC will verify `MAC` (if not on promiscuous mode) and `FCS` and decide to drop or to continue
+1. NIC will [DMA packets at RAM](https://en.wikipedia.org/wiki/Direct_memory_access), in a region previously prepared (mapped) by the driver
+1. NIC will enqueue references to the packets at receive [ring buffer](https://en.wikipedia.org/wiki/Circular_buffer) queue `rx` until `rx-usecs` timeout or `rx-frames`
+1. NIC will raise a `hard IRQ`
 1. CPU will run the `IRQ handler` that runs the driver's code
-1. Driver will `schedule a NAPI`, clear the hardIRQ and return
-1. Driver raise a `softIRQ (NET_RX_SOFTIRQ)`
-1. NAPI will poll data from receive ring buffer until `netdev_budget_usecs` timeout or `netdev_budget` and `dev_weight` packets
+1. Driver will `schedule a NAPI`, clear the `hard IRQ` and return
+1. Driver raise a `soft IRQ (NET_RX_SOFTIRQ)`
+1. NAPI will poll data from the receive ring buffer until `netdev_budget_usecs` timeout or `netdev_budget` and `dev_weight` packets
+1. Linux will also allocated memory to `sk_buff`
+1. Linux fills the metadata: protocol, interface, setmacheader, removes ethernet
+1. Linux will pass the skb to the kernel stack (`netif_receive_skb`)
+1. It will set the network header, clone `skb` to taps (i.e. tcpdump) and pass it to tc ingress
 1. Packets are handled to a qdisc sized `netdev_max_backlog` with its algorithm defined by `default_qdisc`
-1. Packets are handled to IP and TCP systems
-1. Delivered to the receive buffer and sized as `tcp_rmem`
+1. It calls `ip_rcv` and packets are handled to IP
+1. It calls netfilter (`PREROUTING`)
+1. It looks at the routing table, if fowarding or local
+1. If it's local it calls netfilter (`LOCAL_IN`)
+1. It calls the L4 protocol (for instance `tcp_v4_rcv`)
+1. It finds the right socket
+1. It goes to the tcp finite state machine
+1. Enqueue the packet to  the receive buffer and sized as `tcp_rmem` rules
     1. If `tcp_moderate_rcvbuf` is enabled kernel will auto tune the receive buffer
-1. Application reads data
-
-![tcp ingress flow](/img/tcp_ingress_flow.png "A graphic representation of tcp ingress flow")
+1. Kernel will signalize that there is data available to apps (epoll or any polling system)
+1. Application wakes up and reads the data
 
 ## Egress - they're leaving
 1. Application writes data at send buffer of `tcp_wmem` size
