@@ -2,7 +2,9 @@
 
 Sometimes people are looking for [sysctl](https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt) cargo-culting values that bring high throughput and low latency with no trade-off and that works on every ocasion. That's not realistic, although we can say that the **newer kernel versions are very well tuned by default**. In fact you might [hurt performance if you mess with the defaults](https://medium.com/@duhroach/the-bandwidth-delay-problem-c6a2a578b211).
 
-This brief tutorial was inspired by [the illustrated guide to Linux networking stack](https://blog.packagecloud.io/eng/2016/10/11/monitoring-tuning-linux-networking-stack-receiving-data-illustrated/). This one though, we aim to show **where some of the most used and quoted sysctl parameters are located into the Linux network flow**. We're going to "ignore" some optimizations like offloadings (TSO,GRO and etc) and other details for the sake of briviety.
+This brief tutorial was heavyly inspired by [the illustrated guide to Linux networking stack](https://blog.packagecloud.io/eng/2016/10/11/monitoring-tuning-linux-networking-stack-receiving-data-illustrated/) and many of [Marek Majkowski's posts](https://blog.cloudflare.com/how-to-achieve-low-latency/). 
+
+This one though, we aim to show **where some of the most used and quoted sysctl/network parameters are located into the Linux network flow**. We're going to "ignore" some optimizations like offloadings (TSO,GRO and etc) and other details for the sake of briviety.
 
 > #### Feel free to send corrections and suggestions! :)
 
