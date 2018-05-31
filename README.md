@@ -101,7 +101,7 @@ This one though, we aim to show **where some of the most used and quoted sysctl/
 
 ## TCP Read and Write Buffers/Queues
 * **What** - `tcp_rmem` - min (size used under memory pressure), default (initial size), max (maximum size) - size of receive buffer used by TCP sockets.
-* **Why** - the application buffer/queue to the write/send data, it's provided to the userspace from the skb_buff.
+* **Why** - the application buffer/queue to the write/send data, [understand its consequences can help alot](https://blog.cloudflare.com/the-story-of-one-latency-spike/).
 * **How:**
   * **Check command:** `sysctl net.ipv4.tcp_rmem`
   * **Change command:** `sysctl -w net.ipv4.tcp_rmem="min default max"; when changing default value remember to restart your user space app (ie: your web server, nginx and etc)`
