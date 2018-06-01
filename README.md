@@ -12,6 +12,7 @@
   * Egress QDisc - txqueuelen and default_qdisc
   * TCP Read and Write Buffers/Queues
   * Honorable mentions - TCP FSM and congestion algorithm
+* [Network tools](#network-tools-for-testing-and-monitoring)
 * [References](#references)
 
 # Introduction
@@ -172,7 +173,7 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
 ![tcp finite state machine](https://upload.wikimedia.org/wikipedia/commons/a/a2/Tcp_state_diagram_fixed.svg "A graphic representation of tcp tcp finite state machine")
 Source: https://commons.wikimedia.org/wiki/File:Tcp_state_diagram_fixed_new.svg
 
-# Nework tools for testing and monitoring
+# Network tools for testing and monitoring
 
 * [iperf3](https://iperf.fr/) - network throughput
 * [vegeta](https://github.com/tsenart/vegeta) - HTTP load testing tool
