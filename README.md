@@ -16,9 +16,9 @@
 
 # Introduction
 
-Sometimes people are looking for [sysctl](https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt) cargo-culting values that bring high throughput and low latency with no trade-off and that works on every ocasion. That's not realistic, although we can say that the **newer kernel versions are very well tuned by default**. In fact you might [hurt performance if you mess with the defaults](https://medium.com/@duhroach/the-bandwidth-delay-problem-c6a2a578b211).
+Sometimes people are looking for [sysctl](https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt) cargo cult values that bring high throughput and low latency with no trade-off and that works on every occasion. That's not realistic, although we can say that the **newer kernel versions are very well tuned by default**. In fact, you might [hurt performance if you mess with the defaults](https://medium.com/@duhroach/the-bandwidth-delay-problem-c6a2a578b211).
 
-This brief tutorial shows **where some of the most used and quoted sysctl/network parameters are located into the Linux network flow**, it was heavyly inspired by [the illustrated guide to Linux networking stack](https://blog.packagecloud.io/eng/2016/10/11/monitoring-tuning-linux-networking-stack-receiving-data-illustrated/) and many of [Marek Majkowski's posts](https://blog.cloudflare.com/how-to-achieve-low-latency/). 
+This brief tutorial shows **where some of the most used and quoted sysctl/network parameters are located into the Linux network flow**, it was heavily inspired by [the illustrated guide to Linux networking stack](https://blog.packagecloud.io/eng/2016/10/11/monitoring-tuning-linux-networking-stack-receiving-data-illustrated/) and many of [Marek Majkowski's posts](https://blog.cloudflare.com/how-to-achieve-low-latency/). 
 
 > #### Feel free to send corrections and suggestions! :)
 
@@ -45,13 +45,13 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
 1. Packets are handled to a qdisc sized `netdev_max_backlog` with its algorithm defined by `default_qdisc`
 1. It calls `ip_rcv` and packets are handled to IP
 1. It calls netfilter (`PREROUTING`)
-1. It looks at the routing table, if fowarding or local
+1. It looks at the routing table, if forwarding or local
 1. If it's local it calls netfilter (`LOCAL_IN`)
 1. It calls the L4 protocol (for instance `tcp_v4_rcv`)
 1. It finds the right socket
 1. It goes to the tcp finite state machine
 1. Enqueue the packet to  the receive buffer and sized as `tcp_rmem` rules
-    1. If `tcp_moderate_rcvbuf` is enabled kernel will auto tune the receive buffer
+    1. If `tcp_moderate_rcvbuf` is enabled kernel will auto-tune the receive buffer
 1. Kernel will signalize that there is data available to apps (epoll or any polling system)
 1. Application wakes up and reads the data
 
@@ -59,7 +59,7 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
 1. Application sends message (`sendmsg` or other)
 1. TCP send message allocates skb_buff
 1. It enqueues skb to the socket write buffer of `tcp_wmem` size
-1. Builds the TCP header (src and dst port, check sum)
+1. Builds the TCP header (src and dst port, checksum)
 1. Calls L3 handler (in this case `ipv4` on `tcp_write_xmit` and `tcp_transmit_skb`)
 1. L3 (`ip_queue_xmit`) does its work: build ip header and call netfilter (`LOCAL_OUT`)
 1. Calls output route action
@@ -80,8 +80,8 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
 # What, Why and How - network and sysctl parameters
 
 ## Ring Buffer - rx,tx
-* **What** - the driver receive/send queue a single or multiple queues with fixed size, usually implemented as FIFO, it is located at RAM
-* **Why** - a buffer to smoothly accept bursts of connections without droping them, you might need to increase these queues when you see drops or overrun, aka there are more packets comming than the kernel is able to consume them, the side effect might be increased latency.
+* **What** - the driver receive/send queue a single or multiple queues with a fixed size, usually implemented as FIFO, it is located at RAM
+* **Why** - a buffer to smoothly accept bursts of connections without dropping them, you might need to increase these queues when you see drops or overrun, aka there are more packets coming than the kernel is able to consume them, the side effect might be increased latency.
 * **How:**
   * **Check command:** `ethtool -g ethX`
   * **Change command:** `ethtool -G ethX rx value tx value`
@@ -102,7 +102,7 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
   * **Check command:** `sysctl net.core.netdev_budget_usecs`
   * **Change command:** `sysctl -w net.core.netdev_budget_usecs value`
   * **How to monitor:** `cat /proc/net/softnet_stat; or a better tool https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh`  
-* **What** - `netdev_budget` is the maximum number of packets taken from all interfaces in one polling cycle (NAPI poll). In one polling cycle interfaces which are registered to polling areprobed in a round-robin manner. Also, a polling cycle may not exceed `netdev_budget_usecs` microseconds, even if `netdev_budget` has not been exhausted.
+* **What** - `netdev_budget` is the maximum number of packets taken from all interfaces in one polling cycle (NAPI poll). In one polling cycle interfaces which are registered to polling are probed in a round-robin manner. Also, a polling cycle may not exceed `netdev_budget_usecs` microseconds, even if `netdev_budget` has not been exhausted.
 * **How:**
   * **Check command:** `sysctl net.core.netdev_budget`
   * **Change command:** `sysctl -w net.core.netdev_budget value`
@@ -134,7 +134,7 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
 
 ## TCP Read and Write Buffers/Queues
 * **What** - `tcp_rmem` - min (size used under memory pressure), default (initial size), max (maximum size) - size of receive buffer used by TCP sockets.
-* **Why** - the application buffer/queue to the write/send data, [understand its consequences can help alot](https://blog.cloudflare.com/the-story-of-one-latency-spike/).
+* **Why** - the application buffer/queue to the write/send data, [understand its consequences can help a lot](https://blog.cloudflare.com/the-story-of-one-latency-spike/).
 * **How:**
   * **Check command:** `sysctl net.ipv4.tcp_rmem`
   * **Change command:** `sysctl -w net.ipv4.tcp_rmem="min default max"; when changing default value remember to restart your user space app (ie: your web server, nginx and etc)`
@@ -151,11 +151,11 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
   * **How to monitor:** `cat /proc/net/sockstat`
 
 ## Honorable mentions - TCP FSM and congestion algorithm
-* `somaxconn` - Limit of socket [listen() backlog](https://eklitzke.org/how-tcp-sockets-work), known in userspace as SOMAXCONN. When you change this value you should change your application to the same value, for example [nginx backlog](http://nginx.org/en/docs/http/ngx_http_core_module.html#listen) should be changed.
-* `tcp_fin_timeout` - this specifies how many seconds to wait for a final FIN packet before the socket is forcibly closed.  This is strictly a violation of the TCP specification, but required to prevent denial-of-service attacks.
+* `somaxconn` - Limit of socket [listen() backlog](https://eklitzke.org/how-tcp-sockets-work), known in userspace as SOMAXCONN. When you change this value you should change your application to the same value, for example, [nginx backlog](http://nginx.org/en/docs/http/ngx_http_core_module.html#listen) should be changed.
+* `tcp_fin_timeout` - this specifies how many seconds to wait for a final FIN packet before the socket is forcibly closed.  This is strictly a violation of the TCP specification but required to prevent denial-of-service attacks.
 * `tcp_available_congestion_control` - shows the available congestion control choices that are registered.
 * `tcp_congestion_control` - set the congestion control algorithm to be used for new connections.
-* `tcp_max_syn_backlog` - the maximum number of queued connection requests which have still not received an acknowledgement from the connecting client.  If this number is exceeded, the kernel will begin dropping requests.
+* `tcp_max_syn_backlog` - the maximum number of queued connection requests which have still not received an acknowledgment from the connecting client.  If this number is exceeded, the kernel will begin dropping requests.
 * `tcp_slow_start_after_idle` - enable/disable tcp slow start
 
 **How to monitor:** 
