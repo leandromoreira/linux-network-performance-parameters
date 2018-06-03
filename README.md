@@ -82,7 +82,7 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
 
 ## Ring Buffer - rx,tx
 * **What** - the driver receive/send queue a single or multiple queues with a fixed size, usually implemented as FIFO, it is located at RAM
-* **Why** - a buffer to smoothly accept bursts of connections without dropping them, you might need to increase these queues when you see drops or overrun, aka there are more packets coming than the kernel is able to consume them, the side effect might be increased latency.
+* **Why** - buffer to smoothly accept bursts of connections without dropping them, you might need to increase these queues when you see drops or overrun, aka there are more packets coming than the kernel is able to consume them, the side effect might be increased latency.
 * **How:**
   * **Check command:** `ethtool -g ethX`
   * **Change command:** `ethtool -G ethX rx value tx value`
@@ -90,7 +90,7 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
  
 ## Interrupt Coalescence (IC) - rx-usecs, tx-usecs, rx-frames, tx-frames (hardware IRQ)
 * **What** - number of microseconds/frames to wait before raising a hardIRQ, from the NIC perspective it'll DMA data packets until this timeout/number of frames
-* **Why** - Reduce CPUs usage, hard IRQ, might increase throughput at cost of latency.
+* **Why** - reduce CPUs usage, hard IRQ, might increase throughput at cost of latency.
 * **How:**
   * **Check command:** `ethtool -c ethX`
   * **Change command:** `ethtool -C ethX rx-usecs value tx-usecs value`
@@ -98,26 +98,26 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
   
 ## Interrupt Coalescing (soft IRQ) and Ingress QDisc
 * **What** - maximum number of microseconds in one [NAPI](https://en.wikipedia.org/wiki/New_API) polling cycle. Polling will exit when either `netdev_budget_usecs` have elapsed during the poll cycle or the number of packets processed reaches  `netdev_budget`.
-* **Why** - instead of reacting to tons of softIRQ, the driver keeps polling data, keep an eye on `dropped` and `squeezed`, dropped  # of packets that were dropped because `netdev_max_backlog` was exceeded and squeezed  # of times ksoftirq ran out of `netdev_budget` or time slice with work remaining.
+* **Why** - instead of reacting to tons of softIRQ, the driver keeps polling data; keep an eye on `dropped` (# of packets that were dropped because `netdev_max_backlog` was exceeded) and `squeezed` (# of times ksoftirq ran out of `netdev_budget` or time slice with work remaining).
 * **How:**
   * **Check command:** `sysctl net.core.netdev_budget_usecs`
   * **Change command:** `sysctl -w net.core.netdev_budget_usecs value`
-  * **How to monitor:** `cat /proc/net/softnet_stat; or a better tool https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh`  
+  * **How to monitor:** `cat /proc/net/softnet_stat`; or a [better tool](https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh)
 * **What** - `netdev_budget` is the maximum number of packets taken from all interfaces in one polling cycle (NAPI poll). In one polling cycle interfaces which are registered to polling are probed in a round-robin manner. Also, a polling cycle may not exceed `netdev_budget_usecs` microseconds, even if `netdev_budget` has not been exhausted.
 * **How:**
   * **Check command:** `sysctl net.core.netdev_budget`
   * **Change command:** `sysctl -w net.core.netdev_budget value`
-  * **How to monitor:** `cat /proc/net/softnet_stat; or a better tool https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh`
+  * **How to monitor:** `cat /proc/net/softnet_stat`; or a [better tool](https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh)
 * **What** - `dev_weight` is the maximum number of packets that kernel can handle on a NAPI interrupt, it's a Per-CPU variable. For drivers that support LRO or GRO_HW, a hardware aggregated packet is counted as one packet in this.
 * **How:**
   * **Check command:** `sysctl net.core.dev_weight`
   * **Change command:** `sysctl -w net.core.dev_weight value`
-  * **How to monitor:** `cat /proc/net/softnet_stat;o r a better tool  https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh`
+  * **How to monitor:** `cat /proc/net/softnet_stat`; or a [better tool](https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh)
 * **What** - `netdev_max_backlog` is the maximum number  of  packets,  queued  on  the  INPUT side (_the ingress qdisc_), when the interface receives packets faster than kernel can process them.
 * **How:**
   * **Check command:** `sysctl net.core.netdev_max_backlog`
   * **Change command:** `sysctl -w net.core.netdev_max_backlog value`
-  * **How to monitor:** `cat /proc/net/softnet_stat;or a better tool  https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh`
+  * **How to monitor:** `cat /proc/net/softnet_stat`; or a [better tool](https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh)
   
 ## Egress QDisc - txqueuelen and default_qdisc
 * **What** - `txqueuelen` is the maximum number of packets, queued on the OUTPUT side.
@@ -127,7 +127,7 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
   * **Change command:** `ifconfig ethX txqueuelen value`
   * **How to monitor:** `ip -s link` 
 * **What** - `default_qdisc` is the default queuing discipline to use for network devices.
-* **Why** - each application has different load and need to traffic control and it is used also to fight against [bufferfloat](https://www.bufferbloat.net/projects/codel/wiki/)
+* **Why** - each application has different load and need to traffic control and it is used also to fight against [bufferbloat](https://www.bufferbloat.net/projects/codel/wiki/)
 * **How:**
   * **Check command:** `sysctl net.core.default_qdisc`
   * **Change command:** `sysctl -w net.core.default_qdisc value`
@@ -138,12 +138,12 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
 * **Why** - the application buffer/queue to the write/send data, [understand its consequences can help a lot](https://blog.cloudflare.com/the-story-of-one-latency-spike/).
 * **How:**
   * **Check command:** `sysctl net.ipv4.tcp_rmem`
-  * **Change command:** `sysctl -w net.ipv4.tcp_rmem="min default max"; when changing default value remember to restart your user space app (ie: your web server, nginx and etc)`
+  * **Change command:** `sysctl -w net.ipv4.tcp_rmem="min default max"`; when changing default value, remember to restart your user space app (i.e. your web server, nginx, etc)
   * **How to monitor:** `cat /proc/net/sockstat`
 * **What** - `tcp_wmem` - min (size used under memory pressure), default (initial size), max (maximum size) - size of send buffer used by TCP sockets.
 * **How:**
   * **Check command:** `sysctl net.ipv4.tcp_wmem`
-  * **Change command:** `sysctl -w net.ipv4.tcp_wmem="min default max"; when changing default value remember to restart your user space app (ie: your web server, nginx and etc)`
+  * **Change command:** `sysctl -w net.ipv4.tcp_wmem="min default max"`; when changing default value, remember to restart your user space app (i.e. your web server, nginx, etc)
   * **How to monitor:** `cat /proc/net/sockstat`
 * **What** `tcp_moderate_rcvbuf` - If set, TCP performs receive buffer auto-tuning, attempting to automatically size the buffer.
 * **How:**
@@ -152,23 +152,24 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
   * **How to monitor:** `cat /proc/net/sockstat`
 
 ## Honorable mentions - TCP FSM and congestion algorithm
-* `somaxconn` - Limit of socket [listen() backlog](https://eklitzke.org/how-tcp-sockets-work), known in userspace as SOMAXCONN. When you change this value you should change your application to the same value, for example, [nginx backlog](http://nginx.org/en/docs/http/ngx_http_core_module.html#listen) should be changed.
-* `tcp_fin_timeout` - this specifies how many seconds to wait for a final FIN packet before the socket is forcibly closed.  This is strictly a violation of the TCP specification but required to prevent denial-of-service attacks.
-* `tcp_available_congestion_control` - shows the available congestion control choices that are registered.
-* `tcp_congestion_control` - set the congestion control algorithm to be used for new connections.
-* `tcp_max_syn_backlog` - the maximum number of queued connection requests which have still not received an acknowledgment from the connecting client.  If this number is exceeded, the kernel will begin dropping requests.
-* `tcp_slow_start_after_idle` - enable/disable tcp slow start
+* `sysctl net.core.somaxconn` - provides an upper limit on the value of the backlog parameter passed to the [`listen()` function](https://eklitzke.org/how-tcp-sockets-work), known in userspace as `SOMAXCONN`. If you change this value, you should also change your application to a compatible value (i.e. [nginx backlog](http://nginx.org/en/docs/http/ngx_http_core_module.html#listen)).
+* `cat /proc/sys/net/ipv4/tcp_fin_timeout` - this specifies the number of seconds to wait for a final FIN packet before the socket is forcibly closed.  This is strictly a violation of the TCP specification but required to prevent denial-of-service attacks.
+* `cat /proc/sys/net/ipv4/tcp_available_congestion_control` - shows the available congestion control choices that are registered.
+* `cat /proc/sys/net/ipv4/tcp_congestion_control` - sets the congestion control algorithm to be used for new connections.
+* `cat /proc/sys/net/ipv4/tcp_max_syn_backlog` - sets the maximum number of queued connection requests which have still not received an acknowledgment from the connecting client; if this number is exceeded, the kernel will begin dropping requests.
+* `cat /proc/sys/net/ipv4/tcp_syncookies` - enables/disables [syn cookies](https://en.wikipedia.org/wiki/SYN_cookies), useful for protecting against [syn flood attacks](https://www.cloudflare.com/learning/ddos/syn-flood-ddos-attack/).
+* `cat /proc/sys/net/ipv4/tcp_slow_start_after_idle` - enables/disables tcp slow start.
 
 **How to monitor:** 
-* `netstat -atn | awk '/tcp/ {print $6}' | sort | uniq -c ; summary by state`
-* `ss -neopt state time-wait | wc -l; count for a specific state: established, syn-sent, syn-recv, fin-wait-1, fin-wait-2, time-wait, closed, close-wait, last-ack, listening, closing`
-* `netstat -st; tcp stats summary`
-* `nstat -a; human friendly tcp stats summary`
-* `cat /proc/net/sockstat; summary`
-* `cat /proc/net/tcp; detailed, see each field meaning at https://www.kernel.org/doc/Documentation/networking/proc_net_tcp.txt`
-* `cat /proc/net/netstat; ListenOverflows and ListenDrops are fields to closely monitor;`
+* `netstat -atn | awk '/tcp/ {print $6}' | sort | uniq -c` - summary by state
+* `ss -neopt state time-wait | wc -l` - counters by a specific state: `established`, `syn-sent`, `syn-recv`, `fin-wait-1`, `fin-wait-2`, `time-wait`, `closed`, `close-wait`, `last-ack`, `listening`, `closing`
+* `netstat -st` - tcp stats summary
+* `nstat -a` - human-friendly tcp stats summary
+* `cat /proc/net/sockstat` - summarized socket stats
+* `cat /proc/net/tcp` - detailed stats, see each field meaning at the [kernel docs](https://www.kernel.org/doc/Documentation/networking/proc_net_tcp.txt)
+* `cat /proc/net/netstat` - `ListenOverflows` and `ListenDrops` are important fields to keep an eye on
   * `cat /proc/net/netstat | awk '(f==0) { i=1; while ( i<=NF) {n[i] = $i; i++ }; f=1; next} \
-(f==1){ i=2; while ( i<=NF){ printf "%s = %d\n", n[i], $i; i++}; f=0} ' | grep -v "= 0"; from https://sa-chernomor.livejournal.com/9858.html`
+(f==1){ i=2; while ( i<=NF){ printf "%s = %d\n", n[i], $i; i++}; f=0} ' | grep -v "= 0`; a [human readable `/proc/net/netstat`](https://sa-chernomor.livejournal.com/9858.html)
 
 ![tcp finite state machine](https://upload.wikimedia.org/wikipedia/commons/a/a2/Tcp_state_diagram_fixed.svg "A graphic representation of tcp tcp finite state machine")
 Source: https://commons.wikimedia.org/wiki/File:Tcp_state_diagram_fixed_new.svg
