@@ -198,6 +198,7 @@ Source: https://commons.wikimedia.org/wiki/File:Tcp_state_diagram_fixed_new.svg
 * https://oxnz.github.io/2016/05/03/performance-tuning-networking/
 * https://www.intel.com/content/dam/www/public/us/en/documents/reference-guides/xl710-x710-performance-tuning-linux-guide.pdf
 * https://access.redhat.com/sites/default/files/attachments/20150325_network_performance_tuning.pdf
+* https://blogs.technet.microsoft.com/networking/2009/08/12/where-do-resets-come-from-no-the-stork-does-not-bring-them/
 * https://www.intel.com/content/dam/www/public/us/en/documents/white-papers/multi-core-processor-based-linux-paper.pdf
 * http://syuu.dokukino.com/2013/05/linux-kernel-features-for-high-speed.html
 * https://www.bufferbloat.net/projects/codel/wiki/Best_practices_for_benchmarking_Codel_and_FQ_Codel/
