@@ -39,7 +39,7 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
 1. Driver will `schedule a NAPI`, clear the `hard IRQ` and return
 1. Driver raise a `soft IRQ (NET_RX_SOFTIRQ)`
 1. NAPI will poll data from the receive ring buffer until `netdev_budget_usecs` timeout or `netdev_budget` and `dev_weight` packets
-1. Linux will also allocated memory to `sk_buff`
+1. Linux will also allocate memory to `sk_buff`
 1. Linux fills the metadata: protocol, interface, setmacheader, removes ethernet
 1. Linux will pass the skb to the kernel stack (`netif_receive_skb`)
 1. It will set the network header, clone `skb` to taps (i.e. tcpdump) and pass it to tc ingress
