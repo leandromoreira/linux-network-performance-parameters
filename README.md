@@ -3,23 +3,23 @@
 * [Introduction](#introduction)
 * [Linux network queues overview](#linux-network-queues-overview)
 * [Fitting the sysctl variables into the Linux network flow](#fitting-the-sysctl-variables-into-the-linux-network-flow)
-  * Ingress - they're coming
-  * Egress - they're leaving
+  * [Ingress - they're coming](#ingress---theyre-coming)
+  * [Egress - they're leaving](#egress---theyre-leaving)
 * [What, Why and How - network and sysctl parameters](#what-why-and-how---network-and-sysctl-parameters)
-  * Ring Buffer - rx,tx
-  * Interrupt Coalescence (IC) - rx-usecs, tx-usecs, rx-frames, tx-frames (hardware IRQ)
-  * Interrupt Coalescing (soft IRQ) and Ingress QDisc
-  * Egress QDisc - txqueuelen and default_qdisc
-  * TCP Read and Write Buffers/Queues
-  * Honorable mentions - TCP FSM and congestion algorithm
-* [Network tools](#network-tools-for-testing-and-monitoring)
+  * [Ring Buffer - rx,tx](#ring-buffer---rxtx)
+  * [Interrupt Coalescence (IC) - rx-usecs, tx-usecs, rx-frames, tx-frames (hardware IRQ)](#interrupt-coalescence-ic---rx-usecs-tx-usecs-rx-frames-tx-frames-hardware-irq)
+  * [Interrupt Coalescing (soft IRQ) and Ingress QDisc](#interrupt-coalescing-soft-irq-and-ingress-qdisc)
+  * [Egress QDisc - txqueuelen and default_qdisc](#egress-qdisc---txqueuelen-and-default_qdisc)
+  * [TCP Read and Write Buffers/Queues](#tcp-read-and-write-buffersqueues)
+  * [Honorable mentions - TCP FSM and congestion algorithm](#honorable-mentions---tcp-fsm-and-congestion-algorithm)
+* [Network tools for testing and monitoring](#network-tools-for-testing-and-monitoring)
 * [References](#references)
 
 # Introduction
 
 Sometimes people are looking for [sysctl](https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt) cargo cult values that bring high throughput and low latency with no trade-off and that works on every occasion. That's not realistic, although we can say that the **newer kernel versions are very well tuned by default**. In fact, you might [hurt performance if you mess with the defaults](https://medium.com/@duhroach/the-bandwidth-delay-problem-c6a2a578b211).
 
-This brief tutorial shows **where some of the most used and quoted sysctl/network parameters are located into the Linux network flow**, it was heavily inspired by [the illustrated guide to Linux networking stack](https://blog.packagecloud.io/eng/2016/10/11/monitoring-tuning-linux-networking-stack-receiving-data-illustrated/) and many of [Marek Majkowski's posts](https://blog.cloudflare.com/how-to-achieve-low-latency/). 
+This brief tutorial shows **where some of the most used and quoted sysctl/network parameters are located into the Linux network flow**, it was heavily inspired by [the illustrated guide to Linux networking stack](https://blog.packagecloud.io/eng/2016/10/11/monitoring-tuning-linux-networking-stack-receiving-data-illustrated/) and many of [Marek Majkowski's posts](https://blog.cloudflare.com/how-to-achieve-low-latency/).
 
 > #### Feel free to send corrections and suggestions! :)
 
@@ -75,7 +75,7 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
 1. NIC fetches the packets (via DMA) from RAM to transmit
 1. After the transmission NIC will raise a `hard IRQ` to signal its completion
 1. The driver will handle this IRQ (turn it off)
-1. And schedule (`soft IRQ`) the NAPI poll system 
+1. And schedule (`soft IRQ`) the NAPI poll system
 1. NAPI will handle the receive packets signaling and free the RAM
 
 # What, Why and How - network and sysctl parameters
@@ -87,15 +87,15 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
   * **Check command:** `ethtool -g ethX`
   * **Change command:** `ethtool -G ethX rx value tx value`
   * **How to monitor:** `ethtool -S ethX | grep -e "err" -e "drop" -e "over" -e "miss" -e "timeout" -e "reset" -e "restar" -e "collis" -e "over" | grep -v "\: 0"`
- 
+
 ## Interrupt Coalescence (IC) - rx-usecs, tx-usecs, rx-frames, tx-frames (hardware IRQ)
 * **What** - number of microseconds/frames to wait before raising a hardIRQ, from the NIC perspective it'll DMA data packets until this timeout/number of frames
 * **Why** - reduce CPUs usage, hard IRQ, might increase throughput at cost of latency.
 * **How:**
   * **Check command:** `ethtool -c ethX`
   * **Change command:** `ethtool -C ethX rx-usecs value tx-usecs value`
-  * **How to monitor:** `cat /proc/interrupts` 
-  
+  * **How to monitor:** `cat /proc/interrupts`
+
 ## Interrupt Coalescing (soft IRQ) and Ingress QDisc
 * **What** - maximum number of microseconds in one [NAPI](https://en.wikipedia.org/wiki/New_API) polling cycle. Polling will exit when either `netdev_budget_usecs` have elapsed during the poll cycle or the number of packets processed reaches  `netdev_budget`.
 * **Why** - instead of reacting to tons of softIRQ, the driver keeps polling data; keep an eye on `dropped` (# of packets that were dropped because `netdev_max_backlog` was exceeded) and `squeezed` (# of times ksoftirq ran out of `netdev_budget` or time slice with work remaining).
@@ -118,14 +118,14 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
   * **Check command:** `sysctl net.core.netdev_max_backlog`
   * **Change command:** `sysctl -w net.core.netdev_max_backlog value`
   * **How to monitor:** `cat /proc/net/softnet_stat`; or a [better tool](https://raw.githubusercontent.com/majek/dump/master/how-to-receive-a-packet/softnet.sh)
-  
+
 ## Egress QDisc - txqueuelen and default_qdisc
 * **What** - `txqueuelen` is the maximum number of packets, queued on the OUTPUT side.
 * **Why** - a buffer/queue to face connection burst and also to apply [tc (traffic control).](http://tldp.org/HOWTO/Traffic-Control-HOWTO/intro.html)
 * **How:**
   * **Check command:** `ifconfig ethX`
   * **Change command:** `ifconfig ethX txqueuelen value`
-  * **How to monitor:** `ip -s link` 
+  * **How to monitor:** `ip -s link`
 * **What** - `default_qdisc` is the default queuing discipline to use for network devices.
 * **Why** - each application has different load and need to traffic control and it is used also to fight against [bufferbloat](https://www.bufferbloat.net/projects/codel/wiki/)
 * **How:**
@@ -160,7 +160,7 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
 * `cat /proc/sys/net/ipv4/tcp_syncookies` - enables/disables [syn cookies](https://en.wikipedia.org/wiki/SYN_cookies), useful for protecting against [syn flood attacks](https://www.cloudflare.com/learning/ddos/syn-flood-ddos-attack/).
 * `cat /proc/sys/net/ipv4/tcp_slow_start_after_idle` - enables/disables tcp slow start.
 
-**How to monitor:** 
+**How to monitor:**
 * `netstat -atn | awk '/tcp/ {print $6}' | sort | uniq -c` - summary by state
 * `ss -neopt state time-wait | wc -l` - counters by a specific state: `established`, `syn-sent`, `syn-recv`, `fin-wait-1`, `fin-wait-2`, `time-wait`, `closed`, `close-wait`, `last-ack`, `listening`, `closing`
 * `netstat -st` - tcp stats summary
