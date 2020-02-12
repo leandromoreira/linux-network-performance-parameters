@@ -123,8 +123,8 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
 * **What** - `txqueuelen` is the maximum number of packets, queued on the OUTPUT side.
 * **Why** - a buffer/queue to face connection burst and also to apply [tc (traffic control).](http://tldp.org/HOWTO/Traffic-Control-HOWTO/intro.html)
 * **How:**
-  * **Check command:** `ifconfig ethX`
-  * **Change command:** `ifconfig ethX txqueuelen value`
+  * **Check command:** `ip link show dev ethX`
+  * **Change command:** `ip link set dev ethX txqueuelen N`
   * **How to monitor:** `ip -s link` 
 * **What** - `default_qdisc` is the default queuing discipline to use for network devices.
 * **Why** - each application has different load and need to traffic control and it is used also to fight against [bufferbloat](https://www.bufferbloat.net/projects/codel/wiki/)
