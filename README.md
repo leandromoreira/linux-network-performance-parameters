@@ -134,6 +134,9 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
   * **How to monitor:**   `tc -s qdisc ls dev ethX`
 
 ## TCP Read and Write Buffers/Queues
+
+> The policy that defines what is [memory pressure](https://wwwx.cs.unc.edu/~sparkst/howto/network_tuning.php) is specified at tcp_mem and tcp_moderate_rcvbuf.
+
 * **What** - `tcp_rmem` - min (size used under memory pressure), default (initial size), max (maximum size) - size of receive buffer used by TCP sockets.
 * **Why** - the application buffer/queue to the write/send data, [understand its consequences can help a lot](https://blog.cloudflare.com/the-story-of-one-latency-spike/).
 * **How:**
@@ -234,3 +237,4 @@ Source: https://commons.wikimedia.org/wiki/File:Tcp_state_diagram_fixed_new.svg
 * https://staaldraad.github.io/2017/12/20/netstat-without-netstat/
 * https://loicpefferkorn.net/2016/03/linux-network-metrics-why-you-should-use-nstat-instead-of-netstat/
 * http://assimilationsystems.com/2015/12/29/bufferbloat-network-best-practice/
+* https://wwwx.cs.unc.edu/~sparkst/howto/network_tuning.php
