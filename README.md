@@ -155,6 +155,9 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
   * **How to monitor:** `cat /proc/net/sockstat`
 
 ## Honorable mentions - TCP FSM and congestion algorithm
+
+> Accept and SYN Queues are governed by net.core.somaxconn and net.ipv4.tcp_max_syn_backlog. [Nowadays net.core.somaxconn caps both queue sizes.](https://blog.cloudflare.com/syn-packet-handling-in-the-wild/#queuesizelimits)
+
 * `sysctl net.core.somaxconn` - provides an upper limit on the value of the backlog parameter passed to the [`listen()` function](https://eklitzke.org/how-tcp-sockets-work), known in userspace as `SOMAXCONN`. If you change this value, you should also change your application to a compatible value (i.e. [nginx backlog](http://nginx.org/en/docs/http/ngx_http_core_module.html#listen)).
 * `cat /proc/sys/net/ipv4/tcp_fin_timeout` - this specifies the number of seconds to wait for a final FIN packet before the socket is forcibly closed.  This is strictly a violation of the TCP specification but required to prevent denial-of-service attacks.
 * `cat /proc/sys/net/ipv4/tcp_available_congestion_control` - shows the available congestion control choices that are registered.
