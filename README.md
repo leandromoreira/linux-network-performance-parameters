@@ -44,7 +44,7 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
 1. Linux will pass the skb to the kernel stack (`netif_receive_skb`)
 1. It will set the network header, clone `skb` to taps (i.e. tcpdump) and pass it to tc ingress
 1. Packets are handled to a qdisc sized `netdev_max_backlog` with its algorithm defined by `default_qdisc`
-1. It calls `ip_rcv` and packets are handled to IP
+1. It calls `ip_rcv` and packets are handed to IP
 1. It calls netfilter (`PREROUTING`)
 1. It looks at the routing table, if forwarding or local
 1. If it's local it calls netfilter (`LOCAL_IN`)
