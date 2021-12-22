@@ -5,6 +5,7 @@
 * [Fitting the sysctl variables into the Linux network flow](#fitting-the-sysctl-variables-into-the-linux-network-flow)
   * Ingress - they're coming
   * Egress - they're leaving
+  * How to check - perf
 * [What, Why and How - network and sysctl parameters](#what-why-and-how---network-and-sysctl-parameters)
   * Ring Buffer - rx,tx
   * Interrupt Coalescence (IC) - rx-usecs, tx-usecs, rx-frames, tx-frames (hardware IRQ)
@@ -77,6 +78,17 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
 1. The driver will handle this IRQ (turn it off)
 1. And schedule (`soft IRQ`) the NAPI poll system 
 1. NAPI will handle the receive packets signaling and free the RAM
+
+## How to check - perf
+
+If you want to see the network trace within Linux you can use [perf](https://man7.org/linux/man-pages/man1/perf-trace.1.html).
+
+```
+# this is going to trace all events (not syscalls) to the subsytem net:* while performing the ping
+perf trace --no-syscalls --event 'net:*' ping globo.com -c1 > /dev/null
+```
+![perf trace network](https://user-images.githubusercontent.com/55913/147019725-69624e67-b3ca-48b4-a823-10521d2bed83.png)
+
 
 # What, Why and How - network and sysctl parameters
 
