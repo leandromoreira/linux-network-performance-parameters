@@ -81,7 +81,7 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
 
 ## How to check - perf
 
-If you want to see the network trace within Linux you can use [perf](https://man7.org/linux/man-pages/man1/perf-trace.1.html).
+If you want to see the network tracing within Linux you can use [perf](https://man7.org/linux/man-pages/man1/perf-trace.1.html).
 
 ```
 docker run -it --rm --cap-add SYS_ADMIN --entrypoint bash ljishen/perf
