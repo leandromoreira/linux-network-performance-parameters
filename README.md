@@ -211,7 +211,7 @@ Source: https://commons.wikimedia.org/wiki/File:Tcp_state_diagram_fixed_new.svg
 * https://www.kernel.org/doc/Documentation/networking/multiqueue.txt
 * http://man7.org/linux/man-pages/man7/tcp.7.html
 * http://man7.org/linux/man-pages/man8/tc.8.html
-* http://www.ece.virginia.edu/cheetah/documents/papers/TCPlinux.pdf
+* http://cseweb.ucsd.edu/classes/fa09/cse124/presentations/TCPlinux_implementation.pdf
 * https://netdevconf.org/1.2/papers/bbr-netdev-1.2.new.new.pdf
 * https://blog.cloudflare.com/how-to-receive-a-million-packets/
 * https://blog.cloudflare.com/how-to-achieve-low-latency/
@@ -235,12 +235,12 @@ Source: https://commons.wikimedia.org/wiki/File:Tcp_state_diagram_fixed_new.svg
 * https://lwn.net/Articles/616241/
 * https://medium.com/@duhroach/tools-to-profile-networking-performance-3141870d5233
 * https://www.lmax.com/blog/staff-blogs/2016/05/06/navigating-linux-kernel-network-stack-receive-path/
-* https://es.net/host-tuning/100g-tuning/
+* https://fasterdata.es.net/host-tuning/linux/100g-tuning/
 * http://tcpipguide.com/free/t_TCPOperationalOverviewandtheTCPFiniteStateMachineF-2.htm
 * http://veithen.github.io/2014/01/01/how-tcp-backlog-works-in-linux.html
 * https://people.cs.clemson.edu/~westall/853/tcpperf.pdf
 * http://tldp.org/HOWTO/Traffic-Control-HOWTO/classless-qdiscs.html
-* https://es.net/assets/Papers-and-Publications/100G-Tuning-TechEx2016.tierney.pdf
+* https://fasterdata.es.net/assets/Papers-and-Publications/100G-Tuning-TechEx2016.tierney.pdf
 * https://www.kernel.org/doc/ols/2009/ols2009-pages-169-184.pdf
 * https://devcentral.f5.com/articles/the-send-buffer-in-depth-21845
 * http://packetbomb.com/understanding-throughput-and-tcp-windows/
