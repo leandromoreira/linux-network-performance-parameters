@@ -90,7 +90,7 @@ docker run -it --rm --cap-add SYS_ADMIN --entrypoint bash ljishen/perf
 apt-get update
 apt-get install iputils-ping
 
-# this is going to trace all events (not syscalls) to the subsytem net:* while performing the ping
+# this is going to trace all events (not syscalls) to the subsystem net:* while performing the ping
 perf trace --no-syscalls --event 'net:*' ping globo.com -c1 > /dev/null
 ```
 ![perf trace network](https://user-images.githubusercontent.com/55913/147019725-69624e67-b3ca-48b4-a823-10521d2bed83.png)
