@@ -203,6 +203,7 @@ Source: https://commons.wikimedia.org/wiki/File:Tcp_state_diagram_fixed_new.svg
 * [iperf3](https://iperf.fr/) - network throughput
 * [vegeta](https://github.com/tsenart/vegeta) - HTTP load testing tool
 * [netdata](https://github.com/firehol/netdata) - system for distributed real-time performance and health monitoring
+* [prometheus](https://prometheus.io/) + [grafana](https://grafana.com/) + [node exporter full dashboard](https://grafana.com/grafana/dashboards/1860-node-exporter-full/) - monitoring stack to graph detailed system behaviour
 
 # References
 
