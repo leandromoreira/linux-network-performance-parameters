@@ -153,7 +153,7 @@ perf trace --no-syscalls --event 'net:*' ping globo.com -c1 > /dev/null
 
 ## TCP Read and Write Buffers/Queues
 
-> The policy that defines what is [memory pressure](https://wwwx.cs.unc.edu/~sparkst/howto/network_tuning.php) is specified at tcp_mem and tcp_moderate_rcvbuf.
+> The policy that defines what is [memory pressure](https://web.archive.org/web/20200315112330/wwwx.cs.unc.edu/~sparkst/howto/network_tuning.php) is specified at tcp_mem and tcp_moderate_rcvbuf.
 
 * **What** - `tcp_rmem` - min (size used under memory pressure), default (initial size), max (maximum size) - size of receive buffer used by TCP sockets.
 * **Why** - the application buffer/queue to the write/send data, [understand its consequences can help a lot](https://blog.cloudflare.com/the-story-of-one-latency-spike/).
