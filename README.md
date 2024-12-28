@@ -34,52 +34,52 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
 
 ## Ingress - they're coming
 1. Packets arrive at the NIC
-1. NIC will verify `MAC` (if not on promiscuous mode) and `FCS` and decide to drop or to continue
-1. NIC will [DMA packets at RAM](https://en.wikipedia.org/wiki/Direct_memory_access), in a region previously prepared (mapped) by the driver
-1. NIC will enqueue references to the packets at receive [ring buffer](https://en.wikipedia.org/wiki/Circular_buffer) queue `rx` until `rx-usecs` timeout or `rx-frames`
-1. NIC will raise a `hard IRQ`
-1. CPU will run the `IRQ handler` that runs the driver's code
-1. Driver will `schedule a NAPI`, clear the `hard IRQ` and return
-1. Driver raise a `soft IRQ (NET_RX_SOFTIRQ)`
-1. NAPI will poll data from the receive ring buffer until `netdev_budget_usecs` timeout or `netdev_budget` and `dev_weight` packets
-1. Linux will also allocate memory to `sk_buff`
-1. Linux fills the metadata: protocol, interface, setmacheader, removes ethernet
-1. Linux will pass the skb to the kernel stack (`netif_receive_skb`)
-1. It will set the network header, clone `skb` to taps (i.e. tcpdump) and pass it to tc ingress
-1. Packets are handled to a qdisc sized `netdev_max_backlog` with its algorithm defined by `default_qdisc`
-1. It calls `ip_rcv` and packets are handed to IP
-1. It calls netfilter (`PREROUTING`)
-1. It looks at the routing table, if forwarding or local
-1. If it's local it calls netfilter (`LOCAL_IN`)
-1. It calls the L4 protocol (for instance `tcp_v4_rcv`)
-1. It finds the right socket
-1. It goes to the tcp finite state machine
-1. Enqueue the packet to  the receive buffer and sized as `tcp_rmem` rules
+2. NIC will verify `MAC` (if not on promiscuous mode) and `FCS` and decide to drop or to continue
+3. NIC will [DMA packets at RAM](https://en.wikipedia.org/wiki/Direct_memory_access), in a region previously prepared (mapped) by the driver
+4. NIC will enqueue references to the packets at receive [ring buffer](https://en.wikipedia.org/wiki/Circular_buffer) queue `rx` until `rx-usecs` timeout or `rx-frames`
+5. NIC will raise a `hard IRQ`
+6. CPU will run the `IRQ handler` that runs the driver's code
+7. Driver will `schedule a NAPI`, clear the `hard IRQ` and return
+8. Driver raise a `soft IRQ (NET_RX_SOFTIRQ)`
+9. NAPI will poll data from the receive ring buffer until `netdev_budget_usecs` timeout or `netdev_budget` and `dev_weight` packets
+10. Linux will also allocate memory to `sk_buff`
+11. Linux fills the metadata: protocol, interface, setmacheader, removes ethernet
+12. Linux will pass the skb to the kernel stack (`netif_receive_skb`)
+13. It will set the network header, clone `skb` to taps (i.e. tcpdump) and pass it to tc ingress
+14. Packets are handled to a qdisc sized `netdev_max_backlog` with its algorithm defined by `default_qdisc`
+15. It calls `ip_rcv` and packets are handed to IP
+16. It calls netfilter (`PREROUTING`)
+17. It looks at the routing table, if forwarding or local
+18. If it's local it calls netfilter (`LOCAL_IN`)
+19. It calls the L4 protocol (for instance `tcp_v4_rcv`)
+20. It finds the right socket
+21. It goes to the tcp finite state machine
+22. Enqueue the packet to  the receive buffer and sized as `tcp_rmem` rules
     1. If `tcp_moderate_rcvbuf` is enabled kernel will auto-tune the receive buffer
-1. Kernel will signalize that there is data available to apps (epoll or any polling system)
-1. Application wakes up and reads the data
+23. Kernel will signalize that there is data available to apps (epoll or any polling system)
+24. Application wakes up and reads the data
 
 ## Egress - they're leaving
 1. Application sends message (`sendmsg` or other)
-1. TCP send message allocates skb_buff
-1. It enqueues skb to the socket write buffer of `tcp_wmem` size
-1. Builds the TCP header (src and dst port, checksum)
-1. Calls L3 handler (in this case `ipv4` on `tcp_write_xmit` and `tcp_transmit_skb`)
-1. L3 (`ip_queue_xmit`) does its work: build ip header and call netfilter (`LOCAL_OUT`)
-1. Calls output route action
-1. Calls netfilter (`POST_ROUTING`)
-1. Fragment the packet (`ip_output`)
-1. Calls L2 send function (`dev_queue_xmit`)
-1. Feeds the output (QDisc) queue of `txqueuelen` length with its algorithm `default_qdisc`
-1. The driver code enqueue the packets at the `ring buffer tx`
-1. The driver will do a `soft IRQ (NET_TX_SOFTIRQ)` after `tx-usecs` timeout or `tx-frames`
-1. Re-enable hard IRQ to NIC
-1. Driver will map all the packets (to be sent) to some DMA'ed region
-1. NIC fetches the packets (via DMA) from RAM to transmit
-1. After the transmission NIC will raise a `hard IRQ` to signal its completion
-1. The driver will handle this IRQ (turn it off)
-1. And schedule (`soft IRQ`) the NAPI poll system 
-1. NAPI will handle the receive packets signaling and free the RAM
+2. TCP send message allocates skb_buff
+3. It enqueues skb to the socket write buffer of `tcp_wmem` size
+4. Builds the TCP header (src and dst port, checksum)
+5. Calls L3 handler (in this case `ipv4` on `tcp_write_xmit` and `tcp_transmit_skb`)
+6. L3 (`ip_queue_xmit`) does its work: build ip header and call netfilter (`LOCAL_OUT`)
+7. Calls output route action
+8. Calls netfilter (`POST_ROUTING`)
+9. Fragment the packet (`ip_output`)
+10. Calls L2 send function (`dev_queue_xmit`)
+11. Feeds the output (QDisc) queue of `txqueuelen` length with its algorithm `default_qdisc`
+12. The driver code enqueue the packets at the `ring buffer tx`
+13. The driver will do a `soft IRQ (NET_TX_SOFTIRQ)` after `tx-usecs` timeout or `tx-frames`
+14. Re-enable hard IRQ to NIC
+15. Driver will map all the packets (to be sent) to some DMA'ed region
+16. NIC fetches the packets (via DMA) from RAM to transmit
+17. After the transmission NIC will raise a `hard IRQ` to signal its completion
+18. The driver will handle this IRQ (turn it off)
+19. And schedule (`soft IRQ`) the NAPI poll system 
+20. NAPI will handle the receive packets signaling and free the RAM
 
 ## How to check - perf
 
