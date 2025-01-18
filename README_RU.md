@@ -4,13 +4,13 @@
 * [Обзор сетевых очередей Linux](#Обзор-сетевых-очередей-Linux)
 * [Применение переменных sysctl в сетевом потоке Линукс](#Применение-переменных-sysctl-в-сетевом-потоке-Линукс)
   * Входящие пакеты
-  * Исходящие исходящие
+  * Исходящие пакеты
 * [Что, Почему и Как - сеть и  sysctl параметры](#Что-Почему-и-Как-сеть-и--sysctl-параметры)
-  * Кольцевой буффер (Ring Buffer) - rx,tx
+  * Кольцевой буфер (Ring Buffer) - rx,tx
   * Слияние прерываний (Interrupt Coalescence - IC) - rx-usecs, tx-usecs, rx-frames, tx-frames (аппаратные прерывания IRQ)
-  * Коалисцирование прерываний (программные прерывания - soft IRQ) и входящие QDisc
+  * Коалесцирование прерываний (программные прерывания - soft IRQ) и входящие QDisc
   * Исходящие QDisc - txqueuelen (длина очереди tx) и default_qdisc 
-  * TCP Чтение и Запись Буфер/Очеререди (TCP Read and Write Buffers/Queues)
+  * TCP Чтение и Запись Буфер/Очереди (TCP Read and Write Buffers/Queues)
   * Почетное упоминания - TCP FSM и алгоритм перегрузки (Honorable mentions - TCP FSM and congestion algorithm)
 * [Сетевые утилиты](#сетевые-утилиты-для-тестирования-и-мониторинга)
 * [Рекомендации](#рекомендации)
@@ -19,13 +19,13 @@
 
 >Это адаптированный перевод [работы](https://github.com/leandromoreira/linux-network-performance-parameters). 
 >Для понимания некоторых моментов использовалась [статья.](https://habr.com/ru/company/mailru/blog/314168/). Принимаются любые замечания и предложения.
->Спасибо zizmo и @servers(Artem) - за помощь и конструктивную критику )
+>Спасибо zizmo,@servers(Artem) и rmika - за помощь и конструктивную критику )
 
 # Введение
 
 Иногда, люди пытаются найти некие универсальные значения для  [sysctl](https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt) параметров, применение которых во всех случаях позволит добиться и высокой пропускной способности, и низкой задержки при обработке. К сожалению, это не возможно, хотя стоит отметить, что современные версии ядер **по умолчанию уже неплохо настроены**. Важно понимать, что изменение заданных по умолчанию настроек, может [ухудшить производительность] (https://medium.com/@duhroach/the-bandwidth-delay-problem-c6a2a578b211).
 
-Это краткое руководство, в которм приведены **часто используемые параметры  sysctl касающиеся настрое сети Linux**, вдохновленный [илюстрированным реководством сетевого стэку Linux](https://blog.packagecloud.io/eng/2016/10/11/monitoring-tuning-linux-networking-stack-receiving-data-illustrated/) и многими [постами Marek Majkowski's](https://blog.cloudflare.com/how-to-achieve-low-latency/).
+Это краткое руководство, в котором приведены **часто используемые параметры  sysctl касающиеся настрое сети Linux**, вдохновленный [Иллюстрированное руководство по мониторингу и настройке сетевого стека Linux](https://blog.packagecloud.io/eng/2016/10/11/monitoring-tuning-linux-networking-stack-receiving-data-illustrated/) и многими [постами Marek Majkowski's](https://blog.cloudflare.com/how-to-achieve-low-latency/).
 
 > #### Не стесняйтесь присылать пожелания и предложения! :)
 
@@ -39,7 +39,7 @@
 1. Пакеты прибывают в NIC(сетевой адаптер)
 2. NIC проверяет `MAC` (если не включен "неразборчивый"(promiscuous) режим) и `FCS (Frame check sequence)` и принимает решение отбросить пакет или продолжить обработку.
 3. NIC используя [DMA](https://en.wikipedia.org/wiki/Direct_memory_access), помещает пакеты в RAM регионе, ранее подготовленном (mapped) драйвером 
-4. NIC ставит ссылки в очередь на пакеты при получении [ring buffer](https://en.wikipedia.org/wiki/Circular_buffer) очередь `rx` до истичения `rx-usecs` таймаута или `rx-frames`
+4. NIC ставит ссылки в очередь на пакеты при получении [ring buffer](https://en.wikipedia.org/wiki/Circular_buffer) очередь `rx` до истечения `rx-usecs` таймаута или `rx-frames`
 5. NIC Генерируется аппаратное прерывание, чтобы система узнала о появлении пакета в памяти `hard IRQ`
 6. CPU запустит `IRQ handler` который запускает код драйвера
 7. Драйвер вызовет  `планировщик NAPI`, очистит `hard IRQ` 
@@ -58,7 +58,7 @@
 20. Находит нужный сокет
 21. Он переходит на конечный автомат tcp
 22. Поставит пакет в входящий буффер размер которого определяется правилами `tcp_rmem`
-    1. Если `tcp_moderate_rcvbuf` включен, ядро будет автоматически тюнить пходящий (receive) буфер
+    1. Если `tcp_moderate_rcvbuf` включен, ядро будет автоматически тюнить входящий (receive) буфер
 23. Ядро сигнализирует приложению что доступны данные (epoll или другая  polling система)
 24. Приложение просыпается и читает данные
 
@@ -127,7 +127,7 @@
   
 ## Исходящие QDisc - txqueuelen (длина очереди tx) и default_qdisc
 * **Что** - `txqueuelen` максимальное количество пакетов, поставленных в очередь на стороне вывода.
-* **Почему** - buffer/queue появление разрывов соединений, а также примением контроля трафика [tc (traffic control).](http://tldp.org/HOWTO/Traffic-Control-HOWTO/intro.html)
+* **Почему** - buffer/queue появление разрывов соединений, а также применим контроля трафика [tc (traffic control).](http://tldp.org/HOWTO/Traffic-Control-HOWTO/intro.html)
 * **Как:**
   * **Команда проверки:** `ifconfig ethX`
   * **Как изменить:** `ifconfig ethX txqueuelen value`
