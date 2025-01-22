@@ -20,9 +20,9 @@
 
 # Introduction
 
-Sometimes people are looking for [sysctl](https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt) cargo cult values that bring high throughput and low latency with no trade-off and that works on every occasion. That's not realistic, although we can say that the **newer kernel versions are very well tuned by default**. In fact, you might [hurt performance if you mess with the defaults](https://medium.com/@duhroach/the-bandwidth-delay-problem-c6a2a578b211).
+Sometimes people are looking for [sysctl](https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt) cargo cult values that bring high throughput and low latency with no trade-offs and work in every situation. That's not realistic, although we can say that the **newer kernel versions are very well tuned by default**. In fact, you might [hurt performance if you mess with the defaults](https://medium.com/@duhroach/the-bandwidth-delay-problem-c6a2a578b211).
 
-This brief tutorial shows **where some of the most used and quoted sysctl/network parameters are located into the Linux network flow**, it was heavily inspired by [the illustrated guide to Linux networking stack](https://blog.packagecloud.io/eng/2016/10/11/monitoring-tuning-linux-networking-stack-receiving-data-illustrated/) and many of [Marek Majkowski's posts](https://blog.cloudflare.com/how-to-achieve-low-latency/). 
+This brief tutorial shows **where some of the most used and quoted sysctl/network parameters are located into the Linux network flow**, it was heavily inspired by [the illustrated guide to the Linux networking stack](https://blog.packagecloud.io/eng/2016/10/11/monitoring-tuning-linux-networking-stack-receiving-data-illustrated/) and many of [Marek Majkowski's posts](https://blog.cloudflare.com/how-to-achieve-low-latency/). 
 
 > #### Feel free to send corrections and suggestions! :)
 
@@ -35,12 +35,12 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
 ## Ingress - they're coming
 1. Packets arrive at the NIC
 2. NIC will verify `MAC` (if not on promiscuous mode) and `FCS` and decide to drop or to continue
-3. NIC will [DMA packets at RAM](https://en.wikipedia.org/wiki/Direct_memory_access), in a region previously prepared (mapped) by the driver
+3. NIC will [DMA packets to RAM](https://en.wikipedia.org/wiki/Direct_memory_access), in a region previously prepared (mapped) by the driver
 4. NIC will enqueue references to the packets at receive [ring buffer](https://en.wikipedia.org/wiki/Circular_buffer) queue `rx` until `rx-usecs` timeout or `rx-frames`
 5. NIC will raise a `hard IRQ`
 6. CPU will run the `IRQ handler` that runs the driver's code
-7. Driver will `schedule a NAPI`, clear the `hard IRQ` and return
-8. Driver raise a `soft IRQ (NET_RX_SOFTIRQ)`
+7. 7. The driver will `schedule NAPI`, clear the `hard IRQ`, and return
+8. The driver raises a `soft IRQ (NET_RX_SOFTIRQ)`
 9. NAPI will poll data from the receive ring buffer until `netdev_budget_usecs` timeout or `netdev_budget` and `dev_weight` packets
 10. Linux will also allocate memory to `sk_buff`
 11. Linux fills the metadata: protocol, interface, setmacheader, removes ethernet
@@ -55,7 +55,7 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
 20. It finds the right socket
 21. It goes to the tcp finite state machine
 22. Enqueue the packet to  the receive buffer and sized as `tcp_rmem` rules
-    1. If `tcp_moderate_rcvbuf` is enabled kernel will auto-tune the receive buffer
+    1. If `tcp_moderate_rcvbuf` is enabled, the kernel will auto-tune the receive buffer
 23. Kernel will signalize that there is data available to apps (epoll or any polling system)
 24. Application wakes up and reads the data
 
@@ -70,7 +70,7 @@ This brief tutorial shows **where some of the most used and quoted sysctl/networ
 8. Calls netfilter (`POST_ROUTING`)
 9. Fragment the packet (`ip_output`)
 10. Calls L2 send function (`dev_queue_xmit`)
-11. Feeds the output (QDisc) queue of `txqueuelen` length with its algorithm `default_qdisc`
+11. Feeds the output (QDisc) queue of `txqueuelen` length using its default_qdisc algorithm.
 12. The driver code enqueue the packets at the `ring buffer tx`
 13. The driver will do a `soft IRQ (NET_TX_SOFTIRQ)` after `tx-usecs` timeout or `tx-frames`
 14. Re-enable hard IRQ to NIC
